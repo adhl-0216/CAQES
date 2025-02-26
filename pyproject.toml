@@ -8,10 +8,14 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "nats-py (>=2.9.0,<3.0.0)"
 ]
 
 [tool.poetry]
 packages = [{include = "caqes_core", from = "src"}]
+
+[tool.poetry.scripts]
+start = "caqes_core.app:main"
 
 
 [build-system]
