@@ -1,0 +1,30 @@
+services:
+  caqes-core:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: core
+    volumes:
+      - ..:/workspaces:cached
+    command: sleep infinity
+    depends_on:
+      - nats
+  syslog-ng:
+    image: balabit/syslog-ng:latest
+    container_name: syslog-ng
+    # volumes:
+    # - syslog-config:/etc/syslog-ng/syslog-ng.conf
+    ports:
+      - "514:514/udp"
+      - "601:601/tcp"
+
+  nats:
+    image: nats:latest
+    container_name: nats
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+      - "6222:6222"
+
+volumes:
+  syslog-config:
