@@ -2,7 +2,7 @@ services:
   caqes-core:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: caqes-core.Dockerfile
     container_name: core
     volumes:
       - ..:/workspaces:cached
@@ -10,10 +10,12 @@ services:
     depends_on:
       - nats
   syslog-ng:
-    image: balabit/syslog-ng:latest
+    build:
+      context: .
+      dockerfile: syslog-ng.Dockerfile
     container_name: syslog-ng
-    # volumes:
-    # - syslog-config:/etc/syslog-ng/syslog-ng.conf
+    volumes:
+      - syslog-config:/etc/syslog-ng
     ports:
       - "514:514/udp"
       - "601:601/tcp"
@@ -21,10 +23,16 @@ services:
   nats:
     image: nats:latest
     container_name: nats
+    volumes:
+      - nats-config:/etc/nats
+      - nats-data:/data/jetstream
+    command: "-c /etc/nats/nats-server.conf"
     ports:
       - "4222:4222"
       - "8222:8222"
       - "6222:6222"
 
 volumes:
+  nats-data:
+  nats-config:
   syslog-config:
