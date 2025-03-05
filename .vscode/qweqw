@@ -1,0 +1,86 @@
+import pytest
+import json
+from unittest.mock import AsyncMock, MagicMock, patch
+from alerts.alert_listener import AlertListener
+from models import Alert, AlertJob
+import pytest_asyncio
+
+pytest_plugins = ['pytest_asyncio']
+
+
+@pytest_asyncio.fixture
+async def listener() -> AlertListener:
+    """
+    Fixture that creates a mock AlertListener instance with mocked NATS connection and JetStream.
+    """
+    listener = AlertListener()
+    listener.nc = AsyncMock()
+    listener.js = AsyncMock()
+    return listener
+
+
+@pytest.mark.asyncio
+async def test_connect():
+    """
+    Test the connect method of AlertListener.
+    Verifies that:
+    1. NATS connection is established with correct URL
+    2. JetStream is properly configured with ALERTS stream
+    """
+    listener = AlertListener()
+    with patch('nats.connect') as mock_connect:
+        mock_js = AsyncMock()
+        mock_connect.return_value = AsyncMock(
+            jetstream=MagicMock(return_value=mock_js))
+        await listener.connect()
+        mock_connect.assert_called_once_with("nats://nats:4222")
+        mock_js.add_stream.assert_called_once_with(
+            name="ALERTS",
+            subjects=["alerts.>"]
+        )
+
+
+@pytest.mark.asyncio
+async def test_process_alert(listener: AlertListener):
+    """
+    Test the alert processing functionality.
+    Verifies that:
+    1. Alert data is properly processed into a job
+    2. Job contains the correct alert data
+    3. Message is published to JetStream
+    """
+    alert_data = {
+        "type": "test",
+        "message": "test alert"
+    }
+
+    job = await listener.process_alert(alert_data)
+    assert job is not None
+    assert job.alert_data == alert_data
+    listener.js.publish.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_subscribe(listener: AlertListener):
+    """
+    Test the subscription setup for alert messages.
+    Verifies that JetStream subscription is properly configured.
+    """
+    mock_msg = AsyncMock()
+    mock_msg.data = json.dumps({
+        "type": "test",
+        "message": "test alert"
+    }).encode()
+
+    await listener.subscribe()
+    listener.js.subscribe.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_close(listener: AlertListener):
+    """
+    Test the proper cleanup of NATS connection.
+    Verifies that the NATS connection is closed when the listener is terminated.
+    """
+    await listener.close()
+    listener.nc.close.assert_called_once()

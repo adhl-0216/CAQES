@@ -1,0 +1,45 @@
+import nats
+import json
+import uuid
+from models import Alert, AlertJob
+
+
+class AlertListener:
+    def __init__(self):
+        self.nc = None
+        self.js = None
+
+    async def connect(self):
+        self.nc = await nats.connect("nats://nats:4222")
+        self.js = self.nc.jetstream()
+        await self._ensure_stream()
+
+    async def _ensure_stream(self):
+        try:
+            await self.js.stream_info("ALERTS")
+        except nats.js.errors.NotFoundError:
+            await self.js.add_stream(name="ALERTS", subjects=["alerts.>"])
+
+    async def subscribe(self, subject: str, callback):
+        await self._ensure_stream()
+        return await self.js.subscribe(subject, callback=callback)
+
+    async def process_alert(self, alert_data):
+        if not self.js:
+            await self.connect()
+
+        try:
+            alert = Alert.model_validate(alert_data)
+            job = AlertJob(
+                job_id=str(uuid.uuid4()),
+                alert_data=alert.model_dump()
+            )
+            await self.js.publish("alerts.jobs", job.model_dump_json().encode())
+            return job
+        except Exception as e:
+            print(f"Error creating job: {e}")
+            return None
+
+    async def close(self):
+        if self.nc:
+            await self.nc.close()
