@@ -1,10 +1,13 @@
 import nats
-from nats.aio.client import Client
-from nats.js import JetStreamContext
-from config.settings import settings
-from nats.js.errors import NotFoundError
 import asyncio
+
+from nats.aio.client import Client, Msg
+from nats.js import JetStreamContext
+from nats.js.errors import NotFoundError
 from nats.js.api import StreamConfig
+
+from config.settings import settings
+from models.job import Job
 
 ALERTS_STREAM = "ALERTS"
 JOBS_STREAM = "JOBS"
@@ -61,8 +64,19 @@ class AlertListener:
                 )
                 await self.js.add_stream(config)
 
-    async def _handle_alert_message(self, msg: nats.aio.msg.Msg) -> None:
-        pass
+    async def _handle_alert_message(self, msg: Msg) -> None:
+        if not msg.data:
+            await msg.nak()
+            raise ValueError("Message data is empty")
+
+        try:
+            job = Job(alert_data=msg.data.decode())
+            await self.js.publish(JOBS_STREAM, job.model_dump_json().encode())
+        except Exception as e:
+            # Nack the message so it can be redelivered
+            await msg.nak()
+            raise Exception(
+                f"Failed to publish job to {JOBS_STREAM} stream: {str(e)}")
 
     async def start(self) -> None:
         """Start the alert listener"""
