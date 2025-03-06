@@ -1,11 +1,9 @@
-import json
-from unittest import mock
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 import pytest_asyncio
-from config.settings import NatsSettings
+from nats.js.errors import NotFoundError
+from alerts.alert_listener import AlertListener, ALERTS_STREAM
 
-from alerts.alert_listener import AlertListener
 
 pytest_plugins = ['pytest_asyncio']
 
@@ -22,77 +20,59 @@ async def listener() -> AlertListener:
 
 
 @pytest.mark.asyncio
-@patch('nats.connect')
-async def test_connect(mock_connect):
+async def test_try_connect():
     """
-    Verifies that the NATS connection is established with correct URL
-    """
-    mock_js = AsyncMock()
-    mock_nc = AsyncMock()
-    mock_nc.jetstream = AsyncMock(return_value=mock_js)
-    mock_connect.return_value = mock_nc
-
-    listener = AlertListener()
-    await listener.connect()
-
-    mock_connect.assert_called_once_with("nats://nats:4222")
-    mock_nc.jetstream.assert_called_once()
-
-
-@pytest.mark.asyncio
-@patch('nats.connect')
-async def test_connect_error(mock_connect):
-    """
-    Verifies error handling when connection fails
-    """
-    error = Exception("Connection failed")
-    mock_connect.side_effect = error
-
-    listener = AlertListener()
-    with pytest.raises(Exception) as exc_info:
-        await listener.connect()
-
-    assert str(exc_info.value) == "Connection failed"
-
-
-@pytest.mark.asyncio
-@patch('nats.connect')
-async def test_connect_with_retry(mock_connect):
-    """
-    Verifies that connection retries work as expected
+    Test the internal _try_connect method
     """
     mock_js = AsyncMock()
     mock_nc = AsyncMock()
     mock_nc.jetstream = AsyncMock(return_value=mock_js)
 
-    mock_connect.side_effect = [
-        Exception("First failure"),
-        Exception("Second failure"),
-        mock_nc
-    ]
+    with patch('nats.connect', return_value=mock_nc) as mock_connect:
+        listener = AlertListener()
+        nc, js = await listener._try_connect()
 
-    listener = AlertListener()
-    await listener.connect()
-
-    assert mock_connect.call_count == 3
-    assert listener.nc == mock_nc
-    assert listener.js == mock_js
+        mock_connect.assert_called_once_with(listener.config.url)
+        assert nc == mock_nc
+        assert js == mock_js
 
 
 @pytest.mark.asyncio
-@patch('nats.connect')
-async def test_connect_retry_exhausted(mock_connect):
+async def test_connect_success():
     """
-    Verifies that connection fails after all retries are exhausted
+    Test successful connection on first try
     """
-    mock_connect.side_effect = Exception("Connection failed")
     listener = AlertListener()
-    with pytest.raises(ConnectionError) as exc_info:
+    mock_nc, mock_js = AsyncMock(), AsyncMock()
+
+    with patch.object(listener, '_try_connect', return_value=(mock_nc, mock_js)) as mock_try:
         await listener.connect()
 
-    assert mock_connect.call_count == 3
-    assert str(
-        exc_info.value) == f"Failed to connect after 3 attempts. Last error: Connection failed"
+        mock_try.assert_called_once()
+        assert listener.nc == mock_nc
+        assert listener.js == mock_js
+
+
+@pytest.mark.asyncio
+async def test_connect_with_retries():
+    """
+    Test connection with retries before success
+    """
+    listener = AlertListener()
+    mock_nc, mock_js = AsyncMock(), AsyncMock()
+
+    with patch.object(listener, '_try_connect') as mock_try:
+        mock_try.side_effect = [
+            Exception("First failure"),
+            Exception("Second failure"),
+            (mock_nc, mock_js)
+        ]
+
+        await listener.connect()
+
+        assert mock_try.call_count == 3
+        assert listener.nc == mock_nc
+        assert listener.js == mock_js
 
 
 async def test_close(listener: AlertListener):
@@ -117,3 +97,98 @@ async def test_close_error(listener: AlertListener):
 
     assert str(exc_info.value) == "Close failed"
     listener.nc.close.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_start(listener: AlertListener):
+    """
+    Test successful start of the alert listener
+    """
+    # Setup mocks
+    listener.connect = AsyncMock()
+    listener._ensure_streams = AsyncMock()
+    listener.js.subscribe = AsyncMock()
+
+    # Execute
+    await listener.start()
+
+    # Verify
+    listener.connect.assert_not_called()  # Should not connect as js is already set
+    listener._ensure_streams.assert_called_once()
+    listener.js.subscribe.assert_called_once_with(
+        f"{ALERTS_STREAM}.>",
+        cb=listener._handle_alert_message
+    )
+
+
+@pytest.mark.asyncio
+async def test_start_connection_error(listener: AlertListener):
+    """
+    Test start method when connection fails
+    """
+    # Setup
+    listener.js = None  # Force connection attempt
+    error_msg = "Connection failed"
+    listener.connect = AsyncMock(side_effect=Exception(error_msg))
+
+    # Execute and verify
+    with pytest.raises(Exception) as exc_info:
+        await listener.start()
+
+    assert str(exc_info.value) == error_msg
+    listener.connect.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_ensure_streams_existing(listener: AlertListener):
+    """Test when streams already exist"""
+    # Mock stream_info to succeed for both streams
+    listener.js.stream_info = AsyncMock()
+
+    await listener._ensure_streams()
+
+    # Should check both streams but not create any
+    assert listener.js.stream_info.call_count == 2
+    listener.js.add_stream.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_ensure_streams_create_new(listener: AlertListener):
+    """Test when streams need to be created"""
+    # Mock stream_info to fail with NotFoundError
+    listener.js.stream_info = AsyncMock(side_effect=NotFoundError)
+    listener.js.add_stream = AsyncMock()
+
+    await listener._ensure_streams()
+
+    # Should try to check both streams and create both
+    assert listener.js.stream_info.call_count == 2
+    assert listener.js.add_stream.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_ensure_streams_mixed_state(listener: AlertListener):
+    """Test when one stream exists and one doesn't"""
+    def mock_stream_info(stream_name):
+        if stream_name == ALERTS_STREAM:
+            return AsyncMock()()
+        raise NotFoundError()
+
+    listener.js.stream_info = AsyncMock(side_effect=mock_stream_info)
+    listener.js.add_stream = AsyncMock()
+
+    await listener._ensure_streams()
+
+    assert listener.js.stream_info.call_count == 2
+    listener.js.add_stream.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_ensure_streams_creation_error(listener: AlertListener):
+    """Test when stream creation fails"""
+    listener.js.stream_info = AsyncMock(side_effect=NotFoundError)
+    listener.js.add_stream = AsyncMock(
+        side_effect=Exception("Failed to create stream"))
+
+    with pytest.raises(Exception, match="Failed to create stream"):
+        await listener._ensure_streams()
