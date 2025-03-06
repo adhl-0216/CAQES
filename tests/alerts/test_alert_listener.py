@@ -2,7 +2,9 @@ import pytest
 from unittest.mock import AsyncMock, patch
 import pytest_asyncio
 from nats.js.errors import NotFoundError
-from alerts.alert_listener import AlertListener, ALERTS_STREAM
+from alerts.alert_listener import JOBS_STREAM, AlertListener, ALERTS_STREAM
+from models.job import Job
+import json
 
 
 pytest_plugins = ['pytest_asyncio']
@@ -192,3 +194,73 @@ async def test_ensure_streams_creation_error(listener: AlertListener):
 
     with pytest.raises(Exception, match="Failed to create stream"):
         await listener._ensure_streams()
+
+
+@pytest.mark.asyncio
+async def test_handle_alert_message_success(listener: AlertListener):
+    """
+    Test successful handling of alert message and job publishing
+    """
+    mock_msg = AsyncMock()
+    mock_msg.data = b'''[**] [1:1000001:1] Suspicious MQTT CONNECT Flood [**]
+[Classification: Attempted Denial of Service] [Priority: 1]
+03/05/25-16:45:23.123456 192.168.10.55:49152 -> 192.168.10.10:1883
+TCP TTL:64 TOS:0x0 ID:54321 IpLen:20 DgmLen:60
+******S* Seq: 0x12345678  Ack: 0x0  Win: 0xFFFF  TcpLen: 40'''
+    expected_job_data = Job(
+        alert_data=mock_msg.data.decode(),
+    )
+    listener.js.publish = AsyncMock()
+
+    await listener._handle_alert_message(msg=mock_msg)
+
+    listener.js.publish.assert_called_once()
+    call_args = listener.js.publish.call_args
+    subject, payload = call_args[0]
+    assert subject.startswith(
+        JOBS_STREAM), "Message should be published to Jobs stream"
+    assert isinstance(payload, bytes), "Payload should be bytes"
+    payload_json = json.loads(payload.decode())
+    assert expected_job_data.alert_data == payload_json[
+        'alert_data'], "Job payload should contain alert data"
+    assert expected_job_data.alert_data == payload_json[
+        'alert_data'], "Job payload should contain alert data"
+
+
+@pytest.mark.asyncio
+async def test_handle_alert_message_publish_error(listener: AlertListener):
+    """
+    Test error handling when publishing to job queue fails
+    """
+    mock_msg = AsyncMock()
+    mock_msg.data = b'test'
+    mock_msg.nak = AsyncMock()
+
+    error_msg = "Failed to publish message"
+    listener.js.publish = AsyncMock(side_effect=Exception(error_msg))
+
+    with pytest.raises(Exception) as exc_info:
+        await listener._handle_alert_message(msg=mock_msg)
+
+    assert error_msg in str(exc_info.value)
+    listener.js.publish.assert_called_once()
+    mock_msg.nak.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_handle_alert_message_empty_data(listener: AlertListener):
+    """
+    Test handling of message with empty data
+    """
+    mock_msg = AsyncMock()
+    mock_msg.data = b''
+    mock_msg.nak = AsyncMock()
+
+    listener.js.publish = AsyncMock()
+
+    with pytest.raises(ValueError) as exc_info:
+        await listener._handle_alert_message(msg=mock_msg)
+
+    assert str(exc_info.value) == "Message data is empty"
+    listener.js.publish.assert_not_called()
+    mock_msg.nak.assert_called_once()
