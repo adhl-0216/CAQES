@@ -1,6 +1,6 @@
 import asyncio
-from alerts.alert_parser import AlertParser
-from alerts.alert_listener import AlertListener
+from alerts.worker import Worker
+from config.settings import settings
 
 
 class CaqesApplication:
@@ -37,7 +37,8 @@ class CaqesApplication:
             await parser.close()
 
 
-def main():
-    """Synchronous entry point that runs the async application"""
-    app = CaqesApplication()
-    asyncio.run(app.start())
+async def main():
+
+    num_workers = settings.num_workers
+    tasks = [Worker() for _ in range(num_workers)]
+    await asyncio.gather(*tasks)

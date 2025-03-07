@@ -8,7 +8,8 @@ services:
       - ..:/workspaces:cached
     command: sleep infinity
     depends_on:
-      - nats
+      - mosquitto
+
   syslog-ng:
     build:
       context: .
@@ -19,20 +20,23 @@ services:
     ports:
       - "514:514/udp"
       - "601:601/tcp"
+    depends_on:
+      - mosquitto
 
-  nats:
-    image: nats:latest
-    container_name: nats
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: mosquitto
     volumes:
-      - nats-config:/etc/nats
-      - nats-data:/data/jetstream
-    command: "-c /etc/nats/nats-server.conf"
+      - mosquitto-config:/mosquitto/config
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-log:/mosquitto/log
     ports:
-      - "4222:4222"
-      - "8222:8222"
-      - "6222:6222"
+      - "1883:1883" # Default MQTT port
+      - "9001:9001" # WebSocket port (optional, if needed)
+    restart: unless-stopped
 
 volumes:
-  nats-data:
-  nats-config:
   syslog-config:
+  mosquitto-config:
+  mosquitto-data:
+  mosquitto-log:
