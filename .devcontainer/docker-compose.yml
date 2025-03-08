@@ -8,31 +8,33 @@ services:
       - ..:/workspaces:cached
     command: sleep infinity
     depends_on:
-      - nats
+      - mosquitto
+
   syslog-ng:
     build:
       context: .
       dockerfile: syslog-ng.Dockerfile
     container_name: syslog-ng
     volumes:
-      - syslog-config:/etc/syslog-ng
+      - ../config/syslog-ng:/etc/syslog-ng # Mount local config directory
     ports:
       - "514:514/udp"
       - "601:601/tcp"
+    depends_on:
+      - mosquitto
 
-  nats:
-    image: nats:latest
-    container_name: nats
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: mosquitto
     volumes:
-      - nats-config:/etc/nats
-      - nats-data:/data/jetstream
-    command: "-c /etc/nats/nats-server.conf"
+      - ../config/mosquitto:/mosquitto/config # Mount local config directory
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-log:/mosquitto/log
     ports:
-      - "4222:4222"
-      - "8222:8222"
-      - "6222:6222"
+      - "1883:1883" # Default MQTT port
+      - "9001:9001" # WebSocket port (optional, if needed)
+    restart: unless-stopped
 
 volumes:
-  nats-data:
-  nats-config:
-  syslog-config:
+  mosquitto-data:
+  mosquitto-log:
