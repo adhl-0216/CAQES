@@ -38,22 +38,6 @@ files = [
 ]
 
 [[package]]
-name = "nats-py"
-version = "2.9.0"
-description = "NATS client for Python"
-optional = false
-python-versions = ">=3.7"
-groups = ["main"]
-files = [
-    {file = "nats_py-2.9.0.tar.gz", hash = "sha256:01886eb9e0a87f0ec630652cf1fae65d2a8556378a609bc6cc07d2ea60c8d0dd"},
-]
-
-[package.extras]
-aiohttp = ["aiohttp"]
-fast-parse = ["fast-mail-parser"]
-nkeys = ["nkeys"]
-
-[[package]]
 name = "packaging"
 version = "24.2"
 description = "Core utilities for Python packages"
@@ -64,6 +48,21 @@ files = [
     {file = "packaging-24.2-py3-none-any.whl", hash = "sha256:09abb1bccd265c01f4a3aa3f7a7db064b36514d2cba19a2f694fe6150451a759"},
     {file = "packaging-24.2.tar.gz", hash = "sha256:c228a6dc5e932d346bc5739379109d49e8853dd8223571c7c5b55260edc0b97f"},
 ]
+
+[[package]]
+name = "paho-mqtt"
+version = "2.1.0"
+description = "MQTT version 5.0/3.1.1 client class"
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = [
+    {file = "paho_mqtt-2.1.0-py3-none-any.whl", hash = "sha256:6db9ba9b34ed5bc6b6e3812718c7e06e2fd7444540df2455d2c51bd58808feee"},
+    {file = "paho_mqtt-2.1.0.tar.gz", hash = "sha256:12d6e7511d4137555a3f6ea167ae846af2c7357b10bc6fa4f7c3968fc1723834"},
+]
+
+[package.extras]
+proxy = ["pysocks"]
 
 [[package]]
 name = "pluggy"
@@ -306,4 +305,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12"
-content-hash = "47b7473442b424905db657bf187329daa352be94afc8830b294615c5a98cbf0b"
+content-hash = "3f2b48b22fcffad26b041aa94ba1ce4b3213c92e47fe21990073dd787cecb676"
