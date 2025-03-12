@@ -76,7 +76,7 @@ class MqttClient(MQClient):
         self.client.loop_stop()
         self.client.disconnect()
 
-    def is_connected(self) -> bool:
+    async def is_connected(self) -> bool:
         return self.client.is_connected()
 
     async def reconnect(self) -> None:
@@ -87,7 +87,7 @@ class MqttClient(MQClient):
             self.client.subscribe(topic)
 
     async def subscribe(self, topic: str, callback: callable) -> None:
-        if not self.is_connected():
+        if not await self.is_connected():
             raise RuntimeError("Not connected to MQTT broker")
         try:
             self.client.subscribe(topic)

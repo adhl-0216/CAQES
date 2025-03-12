@@ -5,7 +5,7 @@ from settings.caqes_settings import CaqesSettings
 
 
 class CAQES:
-    def __init__(self, settings: CaqesSettings):
+    def __init__(self, settings: CaqesSettings = None):
         self.settings = settings or CaqesSettings()
 
     async def start(self):
