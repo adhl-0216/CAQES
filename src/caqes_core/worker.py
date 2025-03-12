@@ -38,7 +38,10 @@ class Worker:
         if not self.mq:
             self.mq = ClientFactory.create(self.settings.mq_client_type)
         if not await self.mq.is_connected():
-            await self.mq.connect()
+            try:
+                await self.mq.connect()
+            except Exception as e:
+                raise e
 
     async def _handle_alert(self, msg: Message) -> None:
         if not msg.data:

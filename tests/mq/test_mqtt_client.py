@@ -151,7 +151,7 @@ async def test_subscribe_not_connected(mqtt_client: MqttClient):
     """
     # Set up disconnected state
     mqtt_client.client.subscribe = AsyncMock()
-    mqtt_client.is_connected = MagicMock()
+    mqtt_client.is_connected = AsyncMock()
     mqtt_client.is_connected.return_value = False
     callback = AsyncMock()
 
