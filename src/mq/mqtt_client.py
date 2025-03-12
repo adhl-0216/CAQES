@@ -2,7 +2,7 @@ import asyncio
 from typing import Callable
 from paho.mqtt.client import Client, MQTTMessage
 
-from config.mq_settings import MQSettings
+from settings.mq_settings import MQSettings
 from mq.mq_client import MQClient
 from .mqtt_message import MqttMessage
 
@@ -11,19 +11,16 @@ class MqttClient(MQClient):
     def __init__(self, settings: MQSettings | None = None):
         self.client = Client()
         self.settings = settings or MQSettings()
-        self.connected = False
         self._connect_future: asyncio.Future | None = None
         self.callback: Callable | None = None
         self.loop: asyncio.AbstractEventLoop | None = None
 
         # Set up callbacks
         self.client.on_connect = self._on_connect
-        self.client.on_disconnect = self._on_disconnect
         self.client.on_message = self._on_message
 
     def _on_connect(self, client, userdata, flags, rc):
         if rc == 0:
-            self.connected = True
             if self._connect_future and not self._connect_future.done():
                 self._connect_future.set_result(True)
         else:
@@ -31,9 +28,6 @@ class MqttClient(MQClient):
                 self._connect_future.set_exception(
                     ConnectionError(f"Connection failed with code {rc}")
                 )
-
-    def _on_disconnect(self, client, userdata, rc):
-        self.connected = False
 
     def _on_message(self, client, userdata, message: MQTTMessage):
         if self.callback and self.loop:
@@ -81,10 +75,9 @@ class MqttClient(MQClient):
     async def close(self) -> None:
         self.client.loop_stop()
         self.client.disconnect()
-        self.connected = False
 
     async def is_connected(self) -> bool:
-        return self.connected
+        return self.client.is_connected()
 
     async def reconnect(self) -> None:
         await self.close()
@@ -94,7 +87,7 @@ class MqttClient(MQClient):
             self.client.subscribe(topic)
 
     async def subscribe(self, topic: str, callback: callable) -> None:
-        if not self.connected:
+        if not await self.is_connected():
             raise RuntimeError("Not connected to MQTT broker")
         try:
             self.client.subscribe(topic)

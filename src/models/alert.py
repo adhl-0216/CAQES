@@ -7,6 +7,6 @@ class Alert(BaseModel):
     source_ip: IPvAnyAddress
     destination_ip: IPvAnyAddress
     priority: str
-    timestamp: datetime = Field(default_factory=datetime.now)
+    timestamp: datetime | None | str = Field(default_factory=datetime.now)
     classification: str
     raw: str | None = None

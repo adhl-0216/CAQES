@@ -33,7 +33,6 @@ services:
     ports:
       - "1883:1883" # Default MQTT port
       - "9001:9001" # WebSocket port (optional, if needed)
-    restart: unless-stopped
 
 volumes:
   mosquitto-data:
