@@ -1,0 +1,7 @@
+annotated-types==0.7.0 ; python_version >= "3.12"
+paho-mqtt==2.1.0 ; python_version >= "3.12"
+pydantic-core==2.27.2 ; python_version >= "3.12"
+pydantic-settings==2.8.1 ; python_version >= "3.12"
+pydantic==2.10.6 ; python_version >= "3.12"
+python-dotenv==1.0.1 ; python_version >= "3.12"
+typing-extensions==4.12.2 ; python_version >= "3.12"

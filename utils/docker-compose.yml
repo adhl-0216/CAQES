@@ -1,0 +1,27 @@
+services:
+  caqes:
+    image: caqes/caqes:0.1.0
+    container_name: test-caqes
+    depends_on:
+      - mosquitto
+
+  syslog-ng:
+    image: balabit/syslog-ng:4.2.0
+    container_name: test-syslog-ng
+    volumes:
+      - ../config/syslog-ng/:/etc/syslog-ng/
+    ports:
+      - "515:514/udp"
+      - "602:601/tcp"
+    depends_on:
+      - mosquitto
+
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: test-mosquitto
+    volumes:
+      - ../config/mosquitto/:/mosquitto/config/
+    ports:
+      - "1884:1883"
+
+

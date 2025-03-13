@@ -5,5 +5,8 @@ RUN python3 -m pip install --user pipx && \
     python3 -m pipx ensurepath && \
     pipx install poetry==2.1.1
 
+# Install poetry-plugin-export
+RUN pipx inject poetry poetry-plugin-export
+
 # Verify installation
 RUN poetry --version

@@ -1,6 +1,6 @@
 import asyncio
 
-from caqes_core.worker import Worker
+from worker.worker import Worker
 from settings.caqes_settings import CaqesSettings
 
 

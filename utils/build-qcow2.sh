@@ -1,0 +1,23 @@
+virt-builder alpine-3.19 \
+    --output caqes-v0.1.0.qcow2 \
+    --format qcow2 \
+    --size 5G \
+    --root-password password:P7Z5TI6xfRb0V9 \
+    --install docker,docker-compose,sudo \
+    --run-command 'rc-update add docker boot' \
+    --run-command 'service docker start' \
+    --run-command 'apk update' \
+    --run-command 'apk add openssh' \
+    --run-command 'addgroup docker' \
+    --run-command 'adduser -D -G docker admin' \
+    --run-command 'echo "admin:caqes" | chpasswd' \
+    --run-command 'echo "admin ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers' \
+    --run-command 'mkdir /home/admin/docker' \
+    --upload docker-compose.yml:/home/admin/docker/docker-compose.yml \
+    --run-command 'chown -R admin:docker /home/admin/docker/' \
+    --run-command 'su admin -c "cd /home/admin/docker && docker-compose up -d"' \
+    --run-command 'apk del openssh' \
+    --run-command 'apk cache clean' \
+    --run-command 'rm -rf /var/log/* /tmp/*' \
+    --run-command 'dd if=/dev/zero of=/filler bs=1M status=progress' \
+    --run-command 'rm /filler'
