@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: caqes-core.Dockerfile
-    container_name: core
+    container_name: caqes-core
     volumes:
       - ..:/workspaces:cached
     command: sleep infinity
@@ -16,7 +16,7 @@ services:
       dockerfile: syslog-ng.Dockerfile
     container_name: syslog-ng
     volumes:
-      - ../config/syslog-ng:/etc/syslog-ng # Mount local config directory
+      - ./config/syslog-ng:/etc/syslog-ng
     ports:
       - "514:514/udp"
       - "601:601/tcp"
@@ -27,13 +27,23 @@ services:
     image: eclipse-mosquitto:latest
     container_name: mosquitto
     volumes:
-      - ../config/mosquitto:/mosquitto/config # Mount local config directory
+      - ./config/mosquitto:/mosquitto/config
       - mosquitto-data:/mosquitto/data
       - mosquitto-log:/mosquitto/log
+
+  emqx:
+    image: emqx/emqx:latest
+    container_name: emqx
     ports:
-      - "1883:1883" # Default MQTT port
-      - "9001:9001" # WebSocket port (optional, if needed)
+      - 1883:1883
+      - 8083:8083
+      - 8084:8084
+      - 8883:8883
+      - 18083:18083
+    volumes:
+      - emqx-data:/opt/emqx/data
 
 volumes:
   mosquitto-data:
   mosquitto-log:
+  emqx-data:
