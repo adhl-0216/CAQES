@@ -1,5 +1,6 @@
 import asyncio
 from models.alert import Alert
+from quarantine.network.network_quarantine import NetworkQuarantine
 from quarantine.protocol.protocol_quarantine import ProtocolQuarantine
 from settings.worker_settings import WorkerSettings
 
@@ -17,12 +18,17 @@ class QuarantineOrchestrator:
 
     async def quarantine_by_protocol(self, protocol: ProtocolQuarantine, alert: Alert) -> None:
         success = protocol.ban(
-            identifier=alert.source_ip,
-            identifier_type="peerhost",
+            ip_address=alert.source_ip,
             reason=alert.classification
         )
         if not success:
             print(f"Failed to ban {alert.source_ip} via protocol quarantine")
 
-    async def quarantine_by_network(self, network, alert: Alert) -> None:
-        pass
+    async def quarantine_by_network(self, network: NetworkQuarantine, alert: Alert) -> None:
+        success = network.ban(
+        identifier=alert.source_ip,
+        identifier_type="peerhost",
+        reason=alert.classification
+        )
+        if not success:
+            print(f"Failed to ban {alert.source_ip} via protocol quarantine")
