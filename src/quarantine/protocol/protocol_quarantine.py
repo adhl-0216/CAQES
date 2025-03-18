@@ -21,17 +21,17 @@ class ProtocolQuarantine(ABC):
         return cls._registry[module_type](**kwargs)
 
     @abstractmethod
-    def ban(self, identifier: str, identifier_type: str, reason: str, expire_at: Optional[str] = None) -> bool:
+    def ban(self, ip_address: str, reason: str, expire_at: Optional[str] = None) -> bool:
         pass
 
-    @abstractmethod
-    def unban(self, identifier: str, identifier_type: str) -> bool:
-        pass
+    # @abstractmethod
+    # def unban(self, identifier: str, identifier_type: str) -> bool:
+    #     pass
 
-    @abstractmethod
-    def get_client_info(self, ip: str) -> Optional[Dict[str, Any]]:
-        pass
+    # @abstractmethod
+    # def get_client_info(self, ip: str) -> Optional[Dict[str, Any]]:
+    #     pass
 
-    @abstractmethod
-    def is_banned(self, identifier: str, identifier_type: str) -> bool:
-        pass
+    # @abstractmethod
+    # def is_banned(self, identifier: str, identifier_type: str) -> bool:
+    #     pass

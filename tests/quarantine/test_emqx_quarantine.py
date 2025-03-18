@@ -162,8 +162,8 @@ def test_ban_error(mock_emqx_server: HTTPServer, emqx_module: EMQXQuarantine):
     )
         
     # Assert: Exception raised
-    assert "Response status NOT OK" in str(ex.value)
-
+    assert "Response NOT OK" in str(ex.value)
+    
 # test unban
 # def test_unban_by_clientid_success(mock_emqx_server, emqx_module):
 #     """Test unbanning a client by Client ID with a successful response."""
