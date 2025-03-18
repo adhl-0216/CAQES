@@ -16,7 +16,7 @@ class Worker:
     def __init__(self, settings: WorkerSettings | None = None):
         self.mq: MQClient | None = None
         self.settings = settings or WorkerSettings()
-        self.quarantine_orchestrator: QuarantineOrchestrator = self.settings.quarantine_orchestrator or QuarantineOrchestrator()
+        self.quarantine_orchestrator = QuarantineOrchestrator(settings)
 
     async def run(self) -> None:
         try:
@@ -59,5 +59,5 @@ class Worker:
 
         if alert.priority in {"1", "2"}:
             loop.create_task(
-                self.quarantine_orchestrator.placeholder_quarantine(alert))
+                self.quarantine_orchestrator.quarantine(alert))
         await msg.ack()

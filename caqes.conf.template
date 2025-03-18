@@ -1,0 +1,12 @@
+mq_client_type: MQTT
+networks:
+  - "vlan10"
+protocols:
+  - type: emqx
+    base_url: "http://emqx-server:18083/api/v5"
+    api_key: "your_api_key_here"
+    api_secret: "your_api_secret_here"
+  - type: rabbitmq
+    management_url: "http://rabbitmq-server:15672"
+    username: "guest"
+    password: "guest"
