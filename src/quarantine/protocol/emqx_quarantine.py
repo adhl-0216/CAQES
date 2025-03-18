@@ -19,7 +19,7 @@ class EMQXQuarantine(ProtocolQuarantine):
             ban_method = 'peerhost'
             ban_object = ip_address
 
-        payload = {"as": ban_method, "who": ban_object, "by": self.by, "reason": reason, "at": datetime.now().isoformat()}
+        payload = {"as": ban_method, "who": ban_object, "by": self.by, "reason": reason}
 
         if expire_at:
             payload["until"] = expire_at
