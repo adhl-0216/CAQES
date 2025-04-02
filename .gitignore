@@ -1,5 +1,8 @@
-.env
 __pycache__
 .pytest_cache
 .poetry
+
 caqes.conf
+
+**/logs/
+*.log
