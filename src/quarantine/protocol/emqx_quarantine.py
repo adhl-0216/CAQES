@@ -1,21 +1,26 @@
 from datetime import datetime
 import requests
 from typing import Optional, Dict, Any
+import logging
 from .protocol_quarantine import ProtocolQuarantine
 
 @ProtocolQuarantine.register("emqx")
 class EMQXQuarantine(ProtocolQuarantine):
     """Protocol quarantine module for EMQX MQTT broker."""
     def __init__(self, base_url: str, api_key: str, api_secret: str):
+        self.logger = logging.getLogger("caqes.quarantine.emqx")
         self.base_url = base_url.rstrip('/')
         self.auth = (api_key, api_secret)
         self.by = 'caqes'
 
     def ban(self, ip_address: str, reason: str, expire_at: Optional[str] = None) -> bool:
+        self.logger.info(f"Attempting to ban IP {ip_address}")
         try:
             ban_method = 'clientid'
             ban_object = self._get_client_id_by_ip(ip_address)
+            self.logger.debug(f"Found client ID {ban_object} for IP {ip_address}")
         except:
+            self.logger.warning(f"Failed to find client ID for IP {ip_address}, falling back to peerhost")
             ban_method = 'peerhost'
             ban_object = ip_address
 

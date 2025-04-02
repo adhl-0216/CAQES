@@ -1,0 +1,61 @@
+2025-04-02 18:20:22,724 - INFO - Logging initialized.
+2025-04-02 18:20:22,725 - INFO - Logging initialized.
+2025-04-02 18:20:52,709 - INFO - Logging initialized.
+2025-04-02 18:20:52,710 - INFO - Logging initialized.
+2025-04-02 18:30:47,884 - INFO - Starting worker
+2025-04-02 18:30:47,887 - INFO - Starting worker
+2025-04-02 18:30:47,888 - INFO - Starting worker
+2025-04-02 18:32:24,712 - INFO - Starting worker
+2025-04-02 18:32:24,712 - INFO - Attempting to connect to MQTT broker
+2025-04-02 18:32:24,716 - INFO - Starting worker
+2025-04-02 18:32:24,716 - INFO - Successfully connected to MQTT broker
+2025-04-02 18:32:24,717 - INFO - Attempting to connect to MQTT broker
+2025-04-02 18:32:24,718 - INFO - Successfully connected to MQTT broker
+2025-04-02 18:32:24,719 - INFO - Starting worker
+2025-04-02 18:32:24,719 - INFO - Attempting to connect to MQTT broker
+2025-04-02 18:32:24,721 - INFO - Successfully connected to MQTT broker
+2025-04-02 18:57:01,294 - caqes.worker2435eedc-1c7f-49a3-ab1b-d167493a26c8 - INFO - Starting worker
+2025-04-02 18:57:01,295 - caqes.mq.mqtt - INFO - Attempting to connect to MQTT broker
+2025-04-02 18:57:01,298 - caqes.workerb877870d-356f-4b71-9801-23a35b9b98fa - INFO - Starting worker
+2025-04-02 18:57:01,298 - caqes.mq.mqtt - INFO - Successfully connected to MQTT broker
+2025-04-02 18:57:01,298 - caqes.mq.mqtt - INFO - Attempting to connect to MQTT broker
+2025-04-02 18:57:01,299 - caqes.mq.mqtt - INFO - Successfully connected to MQTT broker
+2025-04-02 18:57:01,300 - caqes.worker36394e75-73c8-47da-b4fb-4bc5629dd398 - INFO - Starting worker
+2025-04-02 18:57:01,300 - caqes.mq.mqtt - INFO - Attempting to connect to MQTT broker
+2025-04-02 18:57:01,301 - caqes.mq.mqtt - INFO - Successfully connected to MQTT broker
+2025-04-02 19:00:45,778 - INFO - [Worker caqes.worker7c111f4f-313b-42bf-b04d-c0e1458cb9ac] - Starting worker
+2025-04-02 19:00:45,781 - INFO - [Worker caqes.worker26a1b86f-4164-4f3f-938a-81537bac1e9e] - Starting worker
+2025-04-02 19:00:45,783 - INFO - [Worker caqes.worker71e3ae06-a2dc-48a1-9c85-8d61870c760d] - Starting worker
+2025-04-02 19:01:50,482 - [caqes.workerdb993de3-4524-4164-9647-5d0ff83509fe] - INFO - Starting worker
+2025-04-02 19:01:50,486 - [caqes.worker4e17b1e2-9f0c-4d6a-902f-a524dc9c4245] - INFO - Starting worker
+2025-04-02 19:01:50,487 - [caqes.worker5098fed7-8abf-4317-9649-a87360b0a135] - INFO - Starting worker
+2025-04-02 19:02:44,278 - [caqes.worker636d1dc7-3f34-4699-b5eb-a8627bb5ca36] - INFO - Starting worker
+2025-04-02 19:02:44,281 - [caqes.worker0cd203d8-4f51-42b1-9496-8b0e852002ad] - INFO - Starting worker
+2025-04-02 19:02:44,283 - [caqes.worker84e162e5-2f88-4686-ad39-97ec5f1e37f1] - INFO - Starting worker
+2025-04-02 19:03:45,668 - [caqes.worker966fd996-8dcd-4195-8de6-3dad374a0eb5] - INFO - Starting worker
+2025-04-02 19:03:45,671 - [caqes.worker8bc7aba6-f9d7-4bec-9fc3-3ce4fdd337d5] - INFO - Starting worker
+2025-04-02 19:03:45,672 - [caqes.worker3d88e547-98f9-4c99-908b-1fd476b15c56] - INFO - Starting worker
+2025-04-02 19:06:18,502 - [caqes.worker3536af57-c42e-4550-98e1-d420d9b3d535] - INFO - Starting worker
+2025-04-02 19:06:18,506 - [caqes.worker6b2a61da-c697-43a0-afc7-1d65c2983e33] - INFO - Starting worker
+2025-04-02 19:06:18,507 - [caqes.workere114a56e-eca4-43f6-bcf9-46c22e0851b4] - INFO - Starting worker
+2025-04-02 19:07:29,551 - [caqes.worker841a6865-96f7-46b1-9087-99213af4ca24] - INFO - Starting worker
+2025-04-02 19:07:29,552 - [caqes.worker841a6865-96f7-46b1-9087-99213af4ca24] - INFO - Attempting to connect to message queue
+2025-04-02 19:07:29,556 - [caqes.workerd7eaf579-8a05-48ea-aae6-9c53cd239089] - INFO - Starting worker
+2025-04-02 19:07:29,556 - [caqes.workerd7eaf579-8a05-48ea-aae6-9c53cd239089] - INFO - Attempting to connect to message queue
+2025-04-02 19:07:29,558 - [caqes.worker64fc419a-3d96-4990-869d-c91e19671893] - INFO - Starting worker
+2025-04-02 19:07:29,559 - [caqes.worker64fc419a-3d96-4990-869d-c91e19671893] - INFO - Attempting to connect to message queue
+2025-04-02 19:07:32,566 - [caqes.worker841a6865-96f7-46b1-9087-99213af4ca24] - ERROR - Failed to connect to message queue: Failed to connect after 3 attempts. Last error: [Errno -3] Temporary failure in name resolution
+2025-04-02 19:07:32,566 - [caqes.worker841a6865-96f7-46b1-9087-99213af4ca24] - ERROR - Worker error: Failed to connect after 3 attempts. Last error: [Errno -3] Temporary failure in name resolution
+2025-04-02 19:07:32,568 - [caqes.workerd7eaf579-8a05-48ea-aae6-9c53cd239089] - ERROR - Failed to connect to message queue: Failed to connect after 3 attempts. Last error: [Errno -3] Temporary failure in name resolution
+2025-04-02 19:07:32,568 - [caqes.workerd7eaf579-8a05-48ea-aae6-9c53cd239089] - ERROR - Worker error: Failed to connect after 3 attempts. Last error: [Errno -3] Temporary failure in name resolution
+2025-04-02 19:07:32,570 - [caqes.worker64fc419a-3d96-4990-869d-c91e19671893] - ERROR - Failed to connect to message queue: Failed to connect after 3 attempts. Last error: [Errno -3] Temporary failure in name resolution
+2025-04-02 19:07:32,571 - [caqes.worker64fc419a-3d96-4990-869d-c91e19671893] - ERROR - Worker error: Failed to connect after 3 attempts. Last error: [Errno -3] Temporary failure in name resolution
+2025-04-02 19:08:49,938 - [caqes.workerc0e32f36-46ca-49b2-8aae-de0844ba43ed] - INFO - Starting worker
+2025-04-02 19:08:49,938 - [caqes.workerc0e32f36-46ca-49b2-8aae-de0844ba43ed] - INFO - Attempting to connect to message queue
+2025-04-02 19:08:49,941 - [caqes.worker057f7a78-026b-450b-a9e3-b3ded6b645aa] - INFO - Starting worker
+2025-04-02 19:08:49,942 - [caqes.worker057f7a78-026b-450b-a9e3-b3ded6b645aa] - INFO - Attempting to connect to message queue
+2025-04-02 19:08:49,943 - [caqes.workera91d2298-d7da-4cee-85cc-63389405cdd0] - INFO - Starting worker
+2025-04-02 19:08:49,943 - [caqes.workera91d2298-d7da-4cee-85cc-63389405cdd0] - INFO - Attempting to connect to message queue
+2025-04-02 19:08:49,944 - [caqes.workerc0e32f36-46ca-49b2-8aae-de0844ba43ed] - INFO - Successfully connected to message queue
+2025-04-02 19:08:49,944 - [caqes.worker057f7a78-026b-450b-a9e3-b3ded6b645aa] - INFO - Successfully connected to message queue
+2025-04-02 19:08:49,944 - [caqes.workera91d2298-d7da-4cee-85cc-63389405cdd0] - INFO - Successfully connected to message queue

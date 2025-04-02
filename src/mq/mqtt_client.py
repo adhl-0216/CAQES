@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from typing import Callable
 from paho.mqtt.client import Client, MQTTMessage
 
@@ -9,6 +10,7 @@ from .mqtt_message import MqttMessage
 
 class MqttClient(MQClient):
     def __init__(self, settings: MQSettings | None = None):
+        self.logger = logging.getLogger("caqes.mq.mqtt")
         self.client = Client()
         self.settings = settings or MQSettings()
         self._connect_future: asyncio.Future | None = None
@@ -21,9 +23,11 @@ class MqttClient(MQClient):
 
     def _on_connect(self, client, userdata, flags, rc):
         if rc == 0:
+            self.logger.info("Successfully connected to MQTT broker")
             if self._connect_future and not self._connect_future.done():
                 self._connect_future.set_result(True)
         else:
+            self.logger.error(f"Failed to connect to MQTT broker with code {rc}")
             if self._connect_future and not self._connect_future.done():
                 self._connect_future.set_exception(
                     ConnectionError(f"Connection failed with code {rc}")
@@ -37,6 +41,7 @@ class MqttClient(MQClient):
             )
 
     async def connect(self) -> None:
+        self.logger.info("Attempting to connect to MQTT broker")
         self.loop = asyncio.get_event_loop()
         last_error = None
         for attempt in range(self.settings.max_retries):
@@ -64,6 +69,7 @@ class MqttClient(MQClient):
                 )
                 return
             except Exception as e:
+                self.logger.warning(f"Connection attempt {attempt + 1} failed: {str(e)}")
                 last_error = e
                 if attempt < self.settings.max_retries - 1:
                     await asyncio.sleep(self.settings.retry_delay * (2 ** attempt))
