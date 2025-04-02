@@ -4,6 +4,7 @@ from pydantic.networks import IPvAnyAddress
 
 
 class Alert(BaseModel):
+    alert_id: str
     source_ip: IPvAnyAddress
     destination_ip: IPvAnyAddress
     priority: str

@@ -13,6 +13,7 @@ dependencies = [
     "paho-mqtt (>=2.1.0,<3.0.0)",
     "requests (>=2.32.3,<3.0.0)",
     "pyyaml (>=6.0.2,<7.0.0)",
+    "rule-engine (>=4.5.3,<5.0.0)",
 ]
 
 [tool.poetry]
