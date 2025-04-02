@@ -5,12 +5,24 @@ import yaml
 from pathlib import Path
 from mq.client_types import ClientType
 from quarantine.protocol.protocol_quarantine import ProtocolQuarantine
+from quarantine.network.network_quarantine import NetworkQuarantine
 
 class WorkerSettings(BaseSettings):
     """Main worker settings with dynamic protocol and network configurations."""
     mq_client_type: ClientType = ClientType.MQTT
-    networks: List[str] = []
+    networks_config: List[dict] = Field(default_factory=list, description="List of network quarantine configs")
     protocols_config: List[dict] = Field(default_factory=list, description="List of protocol quarantine configs")
+
+    @property
+    def networks(self) -> List[NetworkQuarantine]:
+        """Dynamically instantiate network modules from config."""
+        return [
+            NetworkQuarantine.create(
+                type=config["type"],
+                **{k: v for k, v in config.items() if k != "type"}
+            )
+            for config in self.networks_config
+        ]
 
     @property
     def protocols(self) -> List[ProtocolQuarantine]:
@@ -35,7 +47,7 @@ class WorkerSettings(BaseSettings):
 
         return cls(
             mq_client_type=config_data.get("mq_client_type", ClientType.MQTT),
-            networks=config_data.get("networks", []),
+            networks_config=config_data.get("networks", []),
             protocols_config=config_data.get("protocols", [])
         )
 
