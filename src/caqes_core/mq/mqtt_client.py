@@ -3,16 +3,16 @@ import logging
 from typing import Callable
 from paho.mqtt.client import Client, MQTTMessage
 
-from settings.mq_settings import MQSettings
-from mq.mq_client import MQClient
+from settings.worker_settings import WorkerSettings
+from .mq_client import MQClient
 from .mqtt_message import MqttMessage
 
 
 class MqttClient(MQClient):
-    def __init__(self, settings: MQSettings | None = None):
+    def __init__(self, settings: WorkerSettings):
         self.logger = logging.getLogger("caqes.mq.mqtt")
         self.client = Client()
-        self.settings = settings or MQSettings()
+        self.settings = settings
         self._connect_future: asyncio.Future | None = None
         self.callback: Callable | None = None
         self.loop: asyncio.AbstractEventLoop | None = None

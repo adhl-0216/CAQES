@@ -1,6 +1,6 @@
-from mq.client_types import ClientType
-from mq.mq_client import MQClient
-from mq.mqtt_client import MqttClient
+from .client_types import ClientType
+from .mq_client import MQClient
+from .mqtt_client import MqttClient
 
 
 class ClientFactory:
