@@ -3,9 +3,9 @@ from pydantic import BaseModel, Field, field_validator
 from pydantic.networks import IPvAnyAddress
 from uuid import uuid4
 
-from loggers.audit_logger import get_default_logger
+from loggers.audit_logger import init_logger
 
-logger = get_default_logger()
+logger = init_logger()
 
 class Alert(BaseModel):
     alert_id: str = Field(default_factory=lambda : str(uuid4()))

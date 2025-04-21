@@ -1,26 +1,27 @@
-from mq.client_factory import ClientFactory
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, Mock, patch
 import pytest_asyncio
 from settings.worker_settings import WorkerSettings
 from caqes_core.worker import Worker
+from quarantine.quarantine_orchestrator import QuarantineOrchestrator
 
 
 @pytest_asyncio.fixture
 async def worker():
     # Create mock settings
     settings = WorkerSettings()
-
-    # Create mock MQ client
-    mq_mock = AsyncMock()
-    mq_mock.subscribe = AsyncMock()
-    mq_mock.close = AsyncMock()
+    
+    # Create mock orchestrator
+    orchestrator = Mock(spec=QuarantineOrchestrator)
 
     # Create worker instance
-    worker_instance = Worker(settings)
-    worker_instance.mq = mq_mock
+    worker_instance = Worker(settings=settings, orchestrator=orchestrator)
+    worker_instance.mq = AsyncMock()
+    worker_instance.mq.subscribe = AsyncMock()
+    worker_instance.mq.close = AsyncMock()
     
+    # Mock handler
     worker_instance._handle_alert = AsyncMock()
 
     yield worker_instance

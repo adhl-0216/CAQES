@@ -2,8 +2,7 @@ from abc import ABC, abstractmethod
 from typing import AsyncIterator, Callable
 from .message import Message
 
-
-class MQClient(ABC):
+class Client(ABC):
     @abstractmethod
     async def connect(self) -> None:
         pass

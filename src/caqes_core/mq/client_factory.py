@@ -1,14 +1,14 @@
-from .client_types import ClientType
-from .mq_client import MQClient
-from .mqtt_client import MqttClient
+from settings import WorkerSettings
 
+from caqes_core.mq import Client, ClientType
+from caqes_core.mq.mqtt.mqtt_client import MqttClient
 
 class ClientFactory:
     @staticmethod
-    def create(client_type: ClientType) -> MQClient:
+    def create(client_type: ClientType, worker_settings: WorkerSettings) -> Client:
 
         match client_type:
             case ClientType.MQTT:
-                return MqttClient()
+                return MqttClient(worker_settings)
             case _:
                 raise ValueError(f"Unknown client type: {client_type}")

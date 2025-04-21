@@ -1,11 +1,10 @@
+import logging
 from typing import Optional
 import requests
-from datetime import datetime
-from quarantine.network.network_quarantine import NetworkQuarantine
-import logging
+from quarantine import NetworkIntegration, integration_factory
 
-@NetworkQuarantine.register("opnsense")
-class OPNSenseQuarantine(NetworkQuarantine):
+@integration_factory.register("network", "opnsense")
+class OPNSenseIntegration(NetworkIntegration):
     """OPNSense Quarantine Module"""
 
     def __init__(self, base_url: str, api_key: str, api_secret: str):
@@ -139,26 +138,40 @@ class OPNSenseQuarantine(NetworkQuarantine):
 
     def ban(self, ip_address: str, reason: str, expire_at: Optional[str] = None) -> bool:
         """Ban a device by MAC address, falling back to IP if MAC retrieval fails."""
-        self.logger.info(f"Attempting to ban device with IP {ip_address}")
+        self.logger.info("Starting network ban operation")
         try:
             # Try to ban by MAC address first
+            self.logger.debug(f"Attempting to resolve MAC for IP {ip_address}")
             content = self._get_mac_from_ip(ip_address)
-            self.logger.info(f"Banning MAC {content} for IP {ip_address}")
+            self.logger.info("Successfully resolved MAC address")
+            self.logger.debug(f"Found MAC {content} for IP {ip_address}")
             description = f"Quarantined MAC for IP {ip_address}: {reason}"
             
         except (ValueError, RuntimeError) as e:
-            self.logger.warning(f"Failed to ban by MAC: {str(e)}. Falling back to IP {ip_address}")
+            self.logger.warning("MAC resolution failed, falling back to IP ban")
+            self.logger.debug(f"MAC resolution error: {str(e)}")
+            content = ip_address
             description = f"Quarantined IP: {reason}"
 
-        finally:
-            # Add MAC to quarantine alias
+        try:
+            # Add to quarantine alias
+            self.logger.debug(f"Adding {content} to quarantine alias")
             alias_success = self._add_to_quarantine_alias(content, description)
             if not alias_success:
-                raise RuntimeError(f"Failed to update quarantine alias with {content}")
+                self.logger.error("Failed to update quarantine alias")
+                raise RuntimeError(f"Failed to update quarantine alias")
 
             # Apply firewall changes
+            self.logger.info("Applying firewall changes")
             apply_success = self._apply_firewall_changes()
             if not apply_success:
-                raise RuntimeError("Failed to apply firewall rule changes")
+                self.logger.error("Failed to apply firewall changes")
+                raise RuntimeError("Failed to apply firewall changes")
 
+            self.logger.info("Network ban operation completed successfully")
             return True
+
+        except Exception as e:
+            self.logger.error("Network ban operation failed")
+            self.logger.debug(f"Ban operation error details: {str(e)}")
+            raise e

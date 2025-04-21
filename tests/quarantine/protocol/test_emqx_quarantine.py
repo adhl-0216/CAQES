@@ -6,23 +6,25 @@ from pytest_httpserver.httpserver import HTTPServer
 from http import HTTPStatus
 from werkzeug import Request, Response
 
-from quarantine.protocol.emqx_quarantine import EMQXQuarantine
+from quarantine.integrations.protocol.emqx import EMQXIntegration
+from settings.protocol.emqx_settings import EMQXSettings
 
 # Fixtures
 @pytest.fixture
-def emqx_module(httpserver: HTTPServer)-> EMQXQuarantine:
-    return EMQXQuarantine(
+def emqx_module(httpserver: HTTPServer) -> EMQXIntegration:
+    settings = EMQXSettings(
         base_url=httpserver.url_for("/api/v5"),
         api_key="test_key",
         api_secret="test_secret"
     )
+    return EMQXIntegration(settings=settings)
 
 @pytest.fixture
 def mock_emqx_server(httpserver: HTTPServer):
     return httpserver
 
 # Test Cases
-def test_ban_by_clientid_success_with_method_mock(mock_emqx_server: HTTPServer, emqx_module: EMQXQuarantine):
+def test_ban_by_clientid_success_with_method_mock(mock_emqx_server: HTTPServer, emqx_module: EMQXIntegration):
     """Test banning a client by Client ID with a mocked _get_client_id_by_ip."""
     # Arrange: Mock _get_client_id_by_ip to return a client ID
     emqx_module._get_client_id_by_ip = MagicMock(return_value="iot-device-123")
@@ -62,7 +64,7 @@ def test_ban_by_clientid_success_with_method_mock(mock_emqx_server: HTTPServer, 
     assert result is True
     assert len(mock_emqx_server.log) == 1  # Only one request: POST /banned
 
-def test_ban_by_ip_success(mock_emqx_server: HTTPServer, emqx_module: EMQXQuarantine):
+def test_ban_by_ip_success(mock_emqx_server: HTTPServer, emqx_module: EMQXIntegration):
     """Test banning a client by IP with a successful API response."""
     # Arrange: Mock _get_client_id_by_ip to raise an exception, triggering IP fallback
     emqx_module._get_client_id_by_ip = MagicMock(side_effect=Exception("Client Not Found"))
@@ -101,7 +103,7 @@ def test_ban_by_ip_success(mock_emqx_server: HTTPServer, emqx_module: EMQXQuaran
     assert result is True
     assert len(mock_emqx_server.log) == 1  # Only one request: POST /banned
 
-def test_ban_with_expiration(mock_emqx_server: HTTPServer, emqx_module: EMQXQuarantine):
+def test_ban_with_expiration(mock_emqx_server: HTTPServer, emqx_module: EMQXIntegration):
     """Test banning a client with an expire_at timestamp."""
     # Arrange: Mock _get_client_id_by_ip to return a client ID
     emqx_module._get_client_id_by_ip = MagicMock(return_value="iot-device-123")
@@ -144,7 +146,7 @@ def test_ban_with_expiration(mock_emqx_server: HTTPServer, emqx_module: EMQXQuar
     assert result is True
     assert len(mock_emqx_server.log) == 1  # Only one request: POST /banned
 
-def test_ban_error(mock_emqx_server: HTTPServer, emqx_module: EMQXQuarantine):
+def test_ban_error(mock_emqx_server: HTTPServer, emqx_module: EMQXIntegration):
     """Test ban handles network errors (e.g., timeout) gracefully."""
     # Arrange: Mock _get_client_id_by_ip to return a client ID
     emqx_module._get_client_id_by_ip = MagicMock(return_value="iot-device-123")
