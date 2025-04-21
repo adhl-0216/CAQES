@@ -1,7 +1,6 @@
 from typing import Any
 from paho.mqtt.client import MQTTMessage
-from .message import Message
-
+from caqes_core.mq.message import Message
 
 class MqttMessage(Message):
     def __init__(self, message: MQTTMessage):

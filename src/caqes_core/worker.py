@@ -1,25 +1,25 @@
 import asyncio
 import json
-import uuid
+import logging
+import secrets
 
-from settings.worker_settings import WorkerSettings
+from settings import WorkerSettings
 
 from models import Alert
 
-from mq.client_factory import ClientFactory
-from mq.message import Message
+from caqes_core.mq.client_factory import ClientFactory as MqClientFactory
+from caqes_core.mq.message import Message
+from caqes_core.mq.client import Client as MqClient
 
 from quarantine.quarantine_orchestrator import QuarantineOrchestrator
-from loggers.audit_logger import get_worker_logger
-
 
 class Worker:
-    def __init__(self, settings = WorkerSettings()) -> None:
-        self.worker_id = str(uuid.uuid4())
-        self.logger = get_worker_logger(f"caqes.worker{self.worker_id if self.worker_id else ''}")
-        self.mq = None
+    def __init__(self, settings: WorkerSettings , orchestrator: QuarantineOrchestrator) -> None:
+        self.worker_id = secrets.token_hex(4)
+        self.logger = logging.getLogger(f"caqes.worker-{self.worker_id}")
+        self.mq : MqClient = None
         self.settings = settings
-        self.quarantine_orchestrator = QuarantineOrchestrator(self.settings)
+        self.quarantine_orchestrator = orchestrator
 
     async def run(self) -> None:
         self.logger.info("Starting worker")
@@ -41,7 +41,7 @@ class Worker:
     async def _ensure_connected(self) -> None:
         if not self.mq:
             self.logger.debug("Creating new message queue client")
-            self.mq = ClientFactory.create(self.settings.mq_client_type)
+            self.mq = MqClientFactory.create(self.settings.client_type, self.settings)
         if not await self.mq.is_connected():
             try:
                 self.logger.info("Attempting to connect to message queue")
@@ -65,9 +65,19 @@ class Worker:
             asyncio.set_event_loop(loop)
 
         data = json.loads(msg.data.decode())
-        alert = Alert(**data)
+        try:
+            alert = Alert(**data)
+            self.logger.info(f"Created alert object with ID {alert.alert_id}")
+            self.logger.debug(f"Alert details: {alert.model_dump()}")
+        except Exception as e:
+            self.logger.error("Failed to parse alert data")
+            self.logger.debug(f"Parse error: {str(e)}")
+            self.logger.debug(f"Raw data: {data}")
+            await msg.nak()
+            return
 
-        if alert.priority in {"1", "2"}:
+        if alert:
+            self.logger.info(f"Scheduling quarantine task for alert {alert.alert_id}")
             loop.create_task(
                 self.quarantine_orchestrator.quarantine(alert))
         await msg.ack()

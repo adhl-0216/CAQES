@@ -1,14 +1,15 @@
 import pytest
 from pytest_httpserver import HTTPServer
-from quarantine.network.opnsense_quarantine import OPNSenseQuarantine
+from quarantine.integrations.network.opnsense import OPNSenseIntegration
 
 @pytest.fixture
-def opnsense_module(httpserver: HTTPServer) -> OPNSenseQuarantine:
-    return OPNSenseQuarantine(
-        base_url=httpserver.url_for("/api"),
-        api_key="test_key",
-        api_secret="test_secret"
-    )
+def opnsense_module(httpserver: HTTPServer) -> OPNSenseIntegration:
+    settings = {
+        'base_url': httpserver.url_for("/api"),
+        'api_key': "test_key",
+        'api_secret': "test_secret",
+    }
+    return OPNSenseIntegration(**settings)
 
 @pytest.fixture
 def mock_opnsense_server(httpserver: HTTPServer) -> HTTPServer:

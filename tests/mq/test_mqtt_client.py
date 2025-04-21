@@ -2,8 +2,8 @@ import asyncio
 import pytest
 import pytest_asyncio
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
-from mq.mqtt_client import MqttClient
-from settings.mq_settings import MQSettings
+from caqes_core.mq.mqtt.mqtt_client import MqttClient
+from settings.worker_settings import WorkerSettings
 
 
 @pytest_asyncio.fixture
