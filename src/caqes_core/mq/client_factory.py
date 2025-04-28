@@ -1,4 +1,4 @@
-from settings import WorkerSettings
+from caqes_core.settings import WorkerSettings
 
 from caqes_core.mq import Client, ClientType
 from caqes_core.mq.mqtt.mqtt_client import MqttClient

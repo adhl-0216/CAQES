@@ -1,11 +1,13 @@
 import requests
 from typing import Optional
 import logging
-from quarantine import ProtocolIntegration, integration_factory
+from caqes_core.quarantine import ProtocolIntegration, integration_factory
 
-@integration_factory.register("protocol","emqx")
+
+@integration_factory.register("protocol", "emqx")
 class EMQXIntegration(ProtocolIntegration):
     """Protocol quarantine module for EMQX MQTT broker."""
+
     def __init__(self, base_url: str, api_key: str, api_secret: str):
         self.logger = logging.getLogger("caqes.quarantine.emqx")
         self.base_url = base_url.rstrip('/')
@@ -14,48 +16,36 @@ class EMQXIntegration(ProtocolIntegration):
 
     def ban(self, ip_address: str, reason: str, expire_at: Optional[str] = None) -> bool:
         self.logger.info("Starting ban operation")
-        self.logger.debug(f"Ban details - IP: {ip_address}, Reason: {reason}")
-        try:
-            ban_method = 'clientid'
-            self.logger.debug(f"Looking up client ID for IP {ip_address}")
-            ban_object = self._get_client_id_by_ip(ip_address)
-            self.logger.debug(f"Found client ID {ban_object}")
-        except:
-            self.logger.warning("Failed to find client ID, falling back to IP ban")
-            ban_method = 'peerhost'
-            ban_object = ip_address
+        self.logger.info(f"Ban details - IP: {ip_address}, Reason: {reason}")
 
-        payload = {"as": ban_method, "who": ban_object, "by": self.by, "reason": reason}
+        ban_method = 'peerhost'
+        ban_object = ip_address
+
+        payload = {"as": ban_method, "who": ban_object,
+                   "by": self.by, "reason": reason}
         if expire_at:
             payload["until"] = expire_at
-            
+
         self.logger.debug(f"Sending ban request with payload: {payload}")
         try:
-            response = requests.post(f"{self.base_url}/banned", json=payload, auth=self.auth, timeout=5)
-            self.logger.debug(f"Ban response: {response.status_code} {response.content}")
-            
+            response = requests.post(
+                f"{self.base_url}/banned", json=payload, auth=self.auth, timeout=5)
+            self.logger.debug(
+                f"Ban response: {response.status_code} {response.content}")
+
             if response.status_code == 200:
-                self.logger.info(f"Successfully banned {ban_method} instance")
+                self.logger.info(f"Successfully banned by {ban_method}")
                 return True
             else:
-                self.logger.error(f"Ban operation failed with status code {response.status_code}")
-                self.logger.debug(f"Failed ban response content: {response.content}")
+                self.logger.error(
+                    f"Ban operation failed with status code {response.status_code}")
+                self.logger.debug(
+                    f"Failed ban response content: {response.content}")
                 raise Exception("Response NOT OK.")
         except requests.RequestException as e:
             self.logger.error(f"Request exception during ban operation")
             self.logger.debug(f"Request exception details: {str(e)}")
             raise e
-
-    def _get_client_id_by_ip(self, ip_address: str):
-        self.logger.debug(f"Querying clients endpoint for IP {ip_address}")
-        response = requests.get(f"{self.base_url}/clients", auth=self.auth, headers={"Content-Type": "application/json"})
-        data = response.json()
-        clients = data.get('data', [])
-        matching_clients = [client for client in clients if client.get('ip_address')==ip_address]
-
-        if matching_clients:
-            return matching_clients[0]['clientid']
-        raise Exception("Client Not Found")
 
     # def unban(self, identifier: str, identifier_type: str) -> bool:
     #     if identifier_type not in ["peerhost", "clientid"]:

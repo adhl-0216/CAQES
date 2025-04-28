@@ -1,6 +1,6 @@
 from rule_engine import Rule
-from models.alert import Alert
-from models.policy import Policy
+from caqes_core.models.alert import Alert
+from caqes_core.models.policy import Policy
 
 class PolicyEvaluator:
     def __init__(self, policy_config: Policy):

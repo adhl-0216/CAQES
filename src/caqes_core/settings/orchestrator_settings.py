@@ -2,9 +2,9 @@ from typing import List, Dict, Any
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from quarantine import NetworkIntegration, ProtocolIntegration, integration_factory
-from models.policy import Policy
-from policies import PolicyEvaluator
+from caqes_core.quarantine import NetworkIntegration, ProtocolIntegration, integration_factory
+from caqes_core.models.policy import Policy
+from caqes_core.policies import PolicyEvaluator
 
 class OrchestratorSettings(BaseSettings):
     networks_config: List[dict] = Field(default_factory=list, description="List of network quarantine configs")

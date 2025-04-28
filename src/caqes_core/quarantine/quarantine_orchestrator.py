@@ -1,8 +1,8 @@
 import asyncio
 import logging
-from models import Alert
-from quarantine import NetworkIntegration, ProtocolIntegration
-from settings import OrchestratorSettings
+from caqes_core.models import Alert
+from caqes_core.quarantine import NetworkIntegration, ProtocolIntegration
+from caqes_core.settings import OrchestratorSettings
 
 class QuarantineOrchestrator:
     def __init__(self, settings: OrchestratorSettings):

@@ -1,17 +1,21 @@
 import asyncio
 import logging
+import os
 
 from caqes_core.worker import Worker
-from quarantine.quarantine_orchestrator import QuarantineOrchestrator
-from loggers.audit_logger import init_logger
-from settings.config import ConfigManager
+from caqes_core.quarantine.quarantine_orchestrator import QuarantineOrchestrator
+from caqes_core.loggers.audit_logger import init_logger
+from caqes_core.settings.config import ConfigManager
 
 
 class CAQES:
     @classmethod
-    async def start(cls, config_path: str = "caqes.conf"):
+    async def start(cls):
+        config_path = os.getenv("CONFIG_PATH", "caqes.conf")
         init_logger()
         logger = logging.getLogger("caqes")
+        logger.info(f"Using config from {config_path}")
+        
         config = ConfigManager(config_path=config_path)
         orchestrator = QuarantineOrchestrator(settings=config.orchestrator_settings)
 

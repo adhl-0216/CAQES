@@ -3,8 +3,10 @@ import os
 from logging.handlers import RotatingFileHandler
     
 def init_logger():
-    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    log_dir = os.path.join(project_root, "logs")
+    log_dir = os.getenv("LOG_DIR", os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
+        "logs"
+    ))
     log_file = os.path.join(log_dir, "caqes.log")
 
     # Ensure logs directory exists
