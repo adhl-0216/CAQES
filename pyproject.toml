@@ -1,6 +1,6 @@
 [project]
 name = "caqes-core"
-version = "0.1.0"
+version = "0.0.1"
 description = ""
 authors = [
     {name = "ADHL",email = "hanlim2002@gmail.com"}

@@ -3,7 +3,7 @@ import logging
 from typing import Callable, List
 from paho.mqtt.client import Client as MQTTClient, MQTTMessage
 
-from settings.worker_settings import WorkerSettings
+from caqes_core.settings.worker_settings import WorkerSettings
 from caqes_core.mq.client import Client
 from .mqtt_message import MqttMessage
 

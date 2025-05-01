@@ -1,21 +1,21 @@
 from datetime import datetime
+import logging
 from pydantic import BaseModel, Field, field_validator
 from pydantic.networks import IPvAnyAddress
 from uuid import uuid4
 
-from loggers.audit_logger import init_logger
-
-logger = init_logger()
 
 class Alert(BaseModel):
-    alert_id: str = Field(default_factory=lambda : str(uuid4()))
+    alert_id: str = Field(default_factory=lambda: str(uuid4()))
     source_ip: IPvAnyAddress
+    source_port: int
     destination_ip: IPvAnyAddress
-    priority: str = Field(default='high')
+    destination_port: int
+    priority: str = Field(default='1')
     timestamp: datetime | None = Field(default_factory=datetime.now)
     classification: str | None = Field(default="Others")
-    raw: str 
-    
+    raw: str
+
     @field_validator("timestamp")
     @classmethod
     def validate_timestamp(cls, value):
@@ -29,10 +29,11 @@ class Alert(BaseModel):
             try:
                 return datetime.fromisoformat(value)
             except ValueError:
-                logger.warning(f"Invalid timestamp format: {value}, using current time")
+                logging.getLogger().warning(
+                    f"Invalid timestamp format: {value}, using current time")
                 return datetime.now()
         return value
-    
+
     @field_validator("classification")
     @classmethod
     def validate_classification(cls, value):

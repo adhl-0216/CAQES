@@ -1,7 +1,7 @@
 import logging
 import yaml
 from pathlib import Path
-from settings import WorkerSettings, OrchestratorSettings
+from caqes_core.settings import WorkerSettings, OrchestratorSettings
 
 logger = logging.getLogger(__name__)
 

@@ -1,0 +1,23 @@
+# Python-related
+__pycache__/
+*.pyc
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+build/
+venv/
+.venv/
+
+# General development
+.git/
+.gitignore
+.vscode/
+*.log
+*.swp
+*.swo
+tmp/
+temp/
+
+Dockerfile*
+docker-compose*

@@ -3,6 +3,13 @@ __pycache__
 .poetry
 
 caqes.conf
+dist
 
 **/logs/
 *.log
+
+# *.qcow2
+
+tmp
+
+packer_key*

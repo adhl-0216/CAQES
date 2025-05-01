@@ -1,7 +1,7 @@
 import logging
 from typing import Optional
 import requests
-from quarantine import NetworkIntegration, integration_factory
+from caqes_core.quarantine import NetworkIntegration, integration_factory
 
 @integration_factory.register("network", "opnsense")
 class OPNSenseIntegration(NetworkIntegration):

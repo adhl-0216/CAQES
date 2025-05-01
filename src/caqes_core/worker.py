@@ -3,15 +3,15 @@ import json
 import logging
 import secrets
 
-from settings import WorkerSettings
+from .settings import WorkerSettings
 
-from models import Alert
+from .models import Alert
 
-from caqes_core.mq.client_factory import ClientFactory as MqClientFactory
-from caqes_core.mq.message import Message
-from caqes_core.mq.client import Client as MqClient
+from .mq.client_factory import ClientFactory as MqClientFactory
+from .mq.message import Message
+from .mq.client import Client as MqClient
 
-from quarantine.quarantine_orchestrator import QuarantineOrchestrator
+from .quarantine.quarantine_orchestrator import QuarantineOrchestrator
 
 class Worker:
     def __init__(self, settings: WorkerSettings , orchestrator: QuarantineOrchestrator) -> None:
